@@ -62,13 +62,11 @@ class BaseValidator(Validator):
         return {}
 
 
-    def _str_errors(self, error):
+    def str_errors(self, error):
+        """Create an error string."""
         str_tuple = (
-            'Document path: ' + error.document_path,
-            'Schema path: ' + error.schema_path,
-            'Code: ' + error.code,
-            'Rule: ' + error.rule,
-            'Constraint: ' + error.constraint,
-            'Value: ' + error.value,
-            'Info: ' + error.info)
-        return '\n'.join(str_tuple)
+            'Value: ' + str(error.value),
+            'Rule: ' + str(error.rule),
+            'Constraint: ' + str(error.constraint)
+        )
+        return ', '.join(str_tuple)
