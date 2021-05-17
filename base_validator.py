@@ -60,3 +60,15 @@ class BaseValidator(Validator):
                 else:
                     return schema
         return {}
+
+
+    def _str_errors(self, error):
+        str_tuple = (
+            'Document path: ' + error.document_path,
+            'Schema path: ' + error.schema_path,
+            'Code: ' + error.code,
+            'Rule: ' + error.rule,
+            'Constraint: ' + error.constraint,
+            'Value: ' + error.value,
+            'Info: ' + error.info)
+        return '\n'.join(str_tuple)
