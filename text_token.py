@@ -3,8 +3,6 @@
 This module is used to map tokens to user text.
 """
 
-
-from copy import deepcopy
 from logging import getLogger
 
 
@@ -96,5 +94,6 @@ class text_token():
         """
         if self.code not in token_library:
             return token_library['E00000'].format(vars(self))
-        # text_token._logger.debug("Code {}: Parameters: {} Library string: {}".format(self.code, self.parameters, token_library[self.code]))
+        # text_token._logger.debug("Code {}: Parameters: {} Library string: {}".format(
+        #   self.code, self.parameters, token_library[self.code]))
         return self.code + ": " + token_library[self.code].format(**self.parameters)
