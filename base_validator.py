@@ -11,7 +11,7 @@ from cerberus.errors import UNKNOWN_FIELD
 class BaseValidator(Validator):
     """Additional format checks."""
 
-    def error_str(self, token):
+    def error_str(self):
         """Prettier format to a list of errors."""
         return '\n'.join((field + ': ' + str(error) for field, error in self.errors.items()))
 
