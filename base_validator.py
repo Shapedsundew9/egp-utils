@@ -13,7 +13,7 @@ class BaseValidator(Validator):
 
     def error_str(self):
         """Prettier format to a list of errors."""
-        return '\n'.join((field + ': ' + str(error) for field, error in self.errors.items()))
+        return '\n\t'.join((field + ': ' + str(error) for field, error in self.errors.items()))
 
     def _isdir(self, field, value):
         """Validate value is a valid, existing directory."""
@@ -60,7 +60,7 @@ class BaseValidator(Validator):
                     self._error(field, "The file is not decodable JSON: {}".format(ex))
                 else:
                     return schema
-        return {}
+        return None
 
     def str_errors(self, error):
         """Create an error string."""
