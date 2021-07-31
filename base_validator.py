@@ -18,7 +18,8 @@ class BaseValidator(Validator):
 
     def error_str(self):
         """Prettier format to a list of errors."""
-        return '\t' + '\n'.join((field + ': ' + self.str_errors(error) for field, error in self.errors.items()))
+        _logger.debug("Errors: {}", str(self.errors))
+        return '\t' + '\n'.join((field + ': ' + str(error) for field, error in self.errors.items()))
 
     def _isdir(self, field, value):
         """Validate value is a valid, existing directory."""
