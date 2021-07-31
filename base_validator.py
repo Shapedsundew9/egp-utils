@@ -4,7 +4,7 @@ from json import JSONDecodeError, load
 from os import R_OK, W_OK, X_OK, access
 from os.path import isdir, isfile
 from logging import NullHandler, getLogger
-
+from pprint import pformat
 from cerberus import Validator
 from cerberus.errors import UNKNOWN_FIELD
 
@@ -18,8 +18,7 @@ class BaseValidator(Validator):
 
     def error_str(self):
         """Prettier format to a list of errors."""
-        _logger.debug("Errors: {}", str(self.errors))
-        return '\t' + '\n\t'.join((field + ': ' + str(error) for field, error in self.errors.items()))
+        return '\t' + '\n\t'.join((field + ': ' + pformat(error) for field, error in self.errors.items()))
 
     def _isdir(self, field, value):
         """Validate value is a valid, existing directory."""
