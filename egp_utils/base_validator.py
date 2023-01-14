@@ -16,58 +16,58 @@ _logger.addHandler(NullHandler())
 
 class base_validator(Validator):
     """Additional format checks."""
-    
+
     def __init__(self, *args, **kwargs) -> None:
         # FIXME: To satisfy pylance.
         # FIXME: Could better define types here.
         # Cerberus does some complex dynamic definition that pylance cannot statically resolve
         self.document: Any = None
         super().__init__(*args, **kwargs)
-        self._error: Callable[[str, str], None] = super()._error # type: ignore
-        self.schema: Any = super().schema # type: ignore
-        self.normalized: Any = super().normalized # type: ignore
-        self.validate: Any = super().validate # type: ignore
+        self._error: Callable[[str, str], None] = super()._error  # type: ignore
+        self.schema: Any = super().schema  # type: ignore
+        self.normalized: Any = super().normalized  # type: ignore
+        self.validate: Any = super().validate  # type: ignore
 
     def error_str(self) -> str:
         """Prettier format to a list of errors."""
-        return '\n'.join((field + ': ' + pformat(error) for field, error in self.errors.items())) # type: ignore
+        return '\n'.join((field + ': ' + pformat(error) for field, error in self.errors.items()))  # type: ignore
 
-    def _isdir(self, field:str, value:Any) -> bool:
+    def _isdir(self, field: str, value: Any) -> bool:
         """Validate value is a valid, existing directory."""
         if not isdir(value):
             self._error(field, "{} is not a valid directory or does not exist.".format(value))
             return False
         return True
 
-    def _isfile(self, field:str, value:Any) -> bool:
+    def _isfile(self, field: str, value: Any) -> bool:
         """Validate value is a valid, existing file."""
         if not isfile(value):
             self._error(field, "{} is not a valid file or does not exist.".format(value))
             return False
         return True
 
-    def _isreadable(self, field:str, value:Any) -> bool:
+    def _isreadable(self, field: str, value: Any) -> bool:
         """Validate value is a readable file."""
         if not access(value, R_OK):
             self._error(field, "{} is not readable.".format(value))
             return False
         return True
 
-    def _iswriteable(self, field:str, value:Any) -> bool:
+    def _iswriteable(self, field: str, value: Any) -> bool:
         """Validate value is a writeable file."""
         if not access(value, W_OK):
             self._error(field, "{} is not writeable.".format(value))
             return False
         return True
 
-    def _isexecutable(self, field:str, value:Any) -> bool:
+    def _isexecutable(self, field: str, value: Any) -> bool:
         """Validate value is an executable file."""
         if not access(value, X_OK):
             self._error(field, "{} is not executable.".format(value))
             return False
         return True
 
-    def _isjsonfile(self, field:str, value:Any) -> dict | list | None:
+    def _isjsonfile(self, field: str, value: Any) -> dict | list | None:
         """Validate the JSON file is decodable."""
         if self._isfile(field, value) and self._isreadable(field, value):
             with open(value, "r") as file_ptr:
