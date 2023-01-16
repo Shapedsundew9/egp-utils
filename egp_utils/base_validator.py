@@ -1,14 +1,15 @@
 """Extension to the Cerberus Validator with common checks."""
 
 from json import JSONDecodeError, load
-from logging import NullHandler, getLogger, Logger
+from logging import Logger, NullHandler, getLogger
 from os import R_OK, W_OK, X_OK, access
 from os.path import isdir, isfile
 from pprint import pformat
 from typing import Any, Callable
-from cerberus import Validator
-from cerberus.errors import UNKNOWN_FIELD
+from uuid import UUID
 
+from cerberus import TypeDefinition, Validator
+from cerberus.errors import UNKNOWN_FIELD
 
 _logger: Logger = getLogger(__name__)
 _logger.addHandler(NullHandler())
@@ -16,6 +17,10 @@ _logger.addHandler(NullHandler())
 
 class base_validator(Validator):
     """Additional format checks."""
+
+    types_mapping = Validator.types_mapping.copy()  # type: ignore
+    types_mapping['uuid'] = TypeDefinition('uuid', (UUID,), ())
+    types_mapping['callable'] = TypeDefinition('callable', (Callable,), ())
 
     def __init__(self, *args, **kwargs) -> None:
         # FIXME: To satisfy pylance.
