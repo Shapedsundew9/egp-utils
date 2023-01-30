@@ -8,7 +8,7 @@ EGP_EMPTY_TUPLE: tuple[()] = tuple()
 
 
 # https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries
-def merge(a:dict[Any, Any], b:dict[Any, Any], path:list[str] = []) -> dict[Any, Any]:
+def merge(a: dict[Any, Any], b: dict[Any, Any], path: list[str] = [], no_new_keys: bool = False) -> dict[Any, Any]:
     """Merge dict b into a recursively. a is modified.
     This function is equivilent to a.update(b) if b contains no dictionary values with
     the same key as in a.
@@ -16,10 +16,13 @@ def merge(a:dict[Any, Any], b:dict[Any, Any], path:list[str] = []) -> dict[Any, 
     in b that have the same key as a then those dictionaries are merged in the same way.
     Keys in a & b (or common key'd sub-dictionaries) where one is a dict and the other
     some other type raise an exception.
+
     Args
     ----
-    a (dict): Dictionary to merge in to.
-    b (dict): Dictionary to merge.
+    a: Dictionary to merge in to.
+    b: Dictionary to merge.
+    no_new_keys: If True keys in b that are not in a are ignored
+
     Returns
     -------
     a (modified)
@@ -27,11 +30,11 @@ def merge(a:dict[Any, Any], b:dict[Any, Any], path:list[str] = []) -> dict[Any, 
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
-                merge(a[key], b[key], path + [str(key)])
+                merge(a[key], b[key], path + [str(key)], no_new_keys)
             elif a[key] == b[key]:
-                pass # same leaf value
+                pass  # same leaf value
             else:
                 raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
-        else:
+        elif not no_new_keys:
             a[key] = b[key]
     return a
