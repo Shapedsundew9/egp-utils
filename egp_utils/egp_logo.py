@@ -10,7 +10,7 @@ _DATETIME: datetime = datetime(2023, 2, 11, 11, 7, tzinfo=timezone(timedelta(0))
 _HEADER: tuple[str, ...] = (
     f"Erasmus Genetic Programming (EGP) v{_VERSION}",
     f"Released {_DATETIME.strftime('%d-%b-%Y %H:%M:%S')} UTC under MIT license",
-    "Copyright (c) 2023 Shapedsundew9"
+    "Copyright (c) 2023 Shapedsundew9.  https://github.com/Shapedsundew9"
 )
 
 
