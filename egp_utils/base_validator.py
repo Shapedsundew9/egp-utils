@@ -18,7 +18,7 @@ _logger.addHandler(NullHandler())
 class base_validator(Validator):
     """Additional format checks."""
 
-    types_mapping = Validator.types_mapping.copy()  # type: ignore
+    types_mapping: Any = Validator.types_mapping.copy()  # type: ignore
     types_mapping['uuid'] = TypeDefinition('uuid', (UUID,), ())
     types_mapping['callable'] = TypeDefinition('callable', (Callable,), ())
 
@@ -40,46 +40,46 @@ class base_validator(Validator):
     def _isdir(self, field: str, value: Any) -> bool:
         """Validate value is a valid, existing directory."""
         if not isdir(value):
-            self._error(field, "{} is not a valid directory or does not exist.".format(value))
+            self._error(field, f"{value} is not a valid directory or does not exist.")
             return False
         return True
 
     def _isfile(self, field: str, value: Any) -> bool:
         """Validate value is a valid, existing file."""
         if not isfile(value):
-            self._error(field, "{} is not a valid file or does not exist.".format(value))
+            self._error(field, f"{value} is not a valid file or does not exist.")
             return False
         return True
 
     def _isreadable(self, field: str, value: Any) -> bool:
         """Validate value is a readable file."""
         if not access(value, R_OK):
-            self._error(field, "{} is not readable.".format(value))
+            self._error(field, f"{value} is not readable.")
             return False
         return True
 
     def _iswriteable(self, field: str, value: Any) -> bool:
         """Validate value is a writeable file."""
         if not access(value, W_OK):
-            self._error(field, "{} is not writeable.".format(value))
+            self._error(field, f"{value} is not writeable.")
             return False
         return True
 
     def _isexecutable(self, field: str, value: Any) -> bool:
         """Validate value is an executable file."""
         if not access(value, X_OK):
-            self._error(field, "{} is not executable.".format(value))
+            self._error(field, f"{value} is not executable.")
             return False
         return True
 
     def _isjsonfile(self, field: str, value: Any) -> dict | list | None:
         """Validate the JSON file is decodable."""
         if self._isfile(field, value) and self._isreadable(field, value):
-            with open(value, "r") as file_ptr:
+            with open(value, "r", encoding="utf8") as file_ptr:
                 try:
                     schema: dict | list = load(file_ptr)
-                except JSONDecodeError as ex:
-                    self._error(field, "The file is not decodable JSON: {}".format(ex))
+                except JSONDecodeError as exception:
+                    self._error(field, f"The file is not decodable JSON: {exception}")
                 else:
                     return schema
         return None
