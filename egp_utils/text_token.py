@@ -11,14 +11,13 @@ _logger: Logger = getLogger(__name__)
 _logger.addHandler(NullHandler())
 
 
-""" Valid token code prefixes
-    'D': Debug
-    'I': Information
-    'W': Warning
-    'E': Error
-    'F': Fatal
-    'X': Unknown
-"""
+# Valid token code prefixes
+#    'D': Debug
+#    'I': Information
+#    'W': Warning
+#    'E': Error
+#    'F': Fatal
+#    'X': Unknown
 _CODE_PREFIXES: tuple[Literal['D'], Literal['I'], Literal['W'], Literal['E'], Literal['F'], Literal['X']] = ('D', 'I', 'W', 'E', 'F', 'X')
 
 
@@ -29,11 +28,11 @@ When a token with a code in the token_library is converted to a string
 The fmt_str is looked up and formatted with the token parameters.
 """
 token_library: dict[str, str] = {
-    'E00000': 'Unknown error code {token} with parameters {parameters}.'
+    'E00000': 'Unknown error code {code} with parameters {parameters}.'
 }
 
 
-def _valid_code(code:str) -> bool:
+def _valid_code(code: str) -> bool:
     """Sanity of the token code.
 
     Args
@@ -56,7 +55,7 @@ def _valid_code(code:str) -> bool:
     return True
 
 
-def register_token_code(code:str, fmt_str:str) -> None:
+def register_token_code(code: str, fmt_str: str) -> None:
     """Register a token code and text in the token_library.
 
     The registered code can then be used to generate a human readable
@@ -86,7 +85,7 @@ class text_token():
     fmt_str for the code in the token_library.
     """
 
-    def __init__(self, token:dict[str, dict[str, Any]]) -> None:
+    def __init__(self, token: dict[str, dict[str, Any]]) -> None:
         self.code: str = tuple(token.keys())[0]
         self.parameters: dict[str, Any] = token[self.code]
 
