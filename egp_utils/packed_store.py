@@ -157,15 +157,15 @@ def allocate(data: dict[str, list[Any]], delta_size: int, fields: dict[str, Fiel
     """
     # This is ordered so read-only fields are allocated together for CoW performance.
     size: int = 2**delta_size
-    indexed_stores: dict[str, _indexed_store] = {}
+    indexed_stores: dict[str, indexed_store] = {}
     for key, value in sorted(fields.items(), key=lambda x: x[1].get('read_only', True)):
         shape: int | tuple[int, int] = size if value.get('length', 1) == 1 else (size, value['length'])
         if isinstance(value['type'], list):
             data[key].append([value['default']] * size)
-        elif not isinstance(value['type'], _indexed_store):
+        elif not isinstance(value['type'], indexed_store):
             data[key].append(full(shape, value['default'], dtype=value['type']))
         else:
-            istore: _indexed_store = indexed_stores[key] if key in indexed_stores else _indexed_store(size)
+            istore: indexed_store = indexed_stores[key] if key in indexed_stores else indexed_store(size)
             data[key].append(istore.allocate())
 
 
@@ -185,7 +185,7 @@ class devnull():
 class entry():
     """Entry is a dict-like object in a dict like packed_store."""
 
-    def __init__(self, data: dict[str, list[Any]], allocation: int, idx: int, fields: dict[str, Field]) -> None:
+    def __init__(self, data: dict[str, list[Any]] = {}, allocation: int = 0, idx: int = 0, fields: dict[str, Field] = {}) -> None:
         """Bind the entry to an spot in the store.
 
         NOTE: The data store does not need to be the same as bound in store as the _data
@@ -450,7 +450,7 @@ class packed_store(Generic[T]):
 
 class _indexed_store_allocation():
 
-    def __init__(self, store: _indexed_store) -> None:
+    def __init__(self, store: indexed_store) -> None:
         self._data: list[Any] = store._data
         self._empty_set: set[uint32] = store._empty_set
         self._allocation: NDArray[uint32] = full(store._size, 0, dtype=uint32)
@@ -475,8 +475,11 @@ class _indexed_store_allocation():
             self._empty_set.add(deleted_idx)
 
 
-class _indexed_store():
+class indexed_store():
     """For sparsely populated fields to reduce storage costs.
+
+    Sparsely defined fields with > 4 bytes storage (e.g. > int32) can save memory by
+    being stored as a 32 bit index into a smaller store.
 
     Becomes economic when 'fraction populated' * 'allocation size' > 4
     """
