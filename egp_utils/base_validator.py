@@ -30,8 +30,8 @@ class base_validator(Validator):
         super().__init__(*args, **kwargs)
         self._error: Callable[[str, str], None] = super()._error  # type: ignore
         self.schema: Any = super().schema  # type: ignore
-        self.normalized: Any = super().normalized  # type: ignore
-        self.validate: Any = super().validate  # type: ignore
+        self.normalized: Callable = super().normalized  # type: ignore
+        self.validate: Callable = super().validate  # type: ignore
 
     def error_str(self) -> str:
         """Prettier format to a list of errors."""
