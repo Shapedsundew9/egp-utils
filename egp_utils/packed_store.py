@@ -233,6 +233,14 @@ class entry():
         """Make sure we do not copy entrys. This is for performance."""
         assert False, f"Deep copy of entry ref {self['ref']:016X}."
 
+    def get(self, key: str, default: Any) -> Any:
+        """Return the value stored with key if it exists else return default."""
+        return self._data[key][self._allocation][self._idx] if key in self.fields else default
+
+    def setdefault(self, key: str, default: Any) -> Any:
+        """Valid keys are always defined in an entry only invalid keys will return default."""
+        return self._data[key][self._allocation][self._idx] if key in self.fields else default
+
     def keys(self) -> dict_keys[str]:
         """A view of the keys in the entry."""
         return self.fields.keys()
