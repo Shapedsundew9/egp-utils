@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+# Fundamental Constants
 EST: timezone = timezone(timedelta(hours=-5))
 EGP_EPOCH: datetime = datetime(2019, 12, 25, 16, 26, tzinfo=EST)
 EGP_EMPTY_TUPLE: tuple[()] = tuple()
