@@ -289,7 +289,7 @@ class packed_store(Generic[T]):
         """
         if fields is None:
             fields = {}
-        self.entry_type = entry_type
+        self.entry_type: Type[T] = entry_type
         self.fields: dict[str, Field] = deepcopy(fields)
         self.fields['__modified__'] = deepcopy(_MODIFIED)
         self.writable_fields: dict[str, Field] = {k: v for k, v in self.fields.items() if not v['read_only']}
