@@ -182,8 +182,10 @@ class devnull():
         pass
 
 
-class entry():
-    """Entry is a dict-like object in a dict like packed_store."""
+class read_only_entry():
+    """An entry is a dict-like object in a dict like packed_store.
+    The base class is read-only.
+    """
 
     def __init__(self, data: dict[str, list[Any]] = {}, allocation: int = 0, idx: int = 0, fields: dict[str, Field] = {}) -> None:
         """Bind the entry to an spot in the store.
@@ -215,16 +217,6 @@ class entry():
             _logger.debug(f"Getting key '{key}' from allocation {self._allocation}, index {self._idx}).")
         return self._data[key][self._allocation][self._idx]
 
-    def __setitem__(self, key: str, value: Any) -> None:
-        """Set the value stored with key."""
-        if __debug__:
-            assert key in self._data, f"'{key}' is not a key in data."
-            assert not self.fields[key]['read_only'], f"Writing to read-only field '{key}'."
-            self.fields[key]['write_count'] += 1
-            _logger.debug(f"Setting key '{key}' to allocation {self._allocation}, index {self._idx}).")
-        self._data[key][self._allocation][self._idx] = value
-        self._data['__modified__'][self._allocation][self._idx] = True
-
     def __copy__(self) -> NoReturn:
         """Make sure we do not copy entries. This is for performance."""
         assert False, f"Shallow copy of entry ref {self['ref']:016X}."
@@ -237,10 +229,6 @@ class entry():
         """Return the value stored with key if it exists else return default."""
         return self._data[key][self._allocation][self._idx] if key in self.fields else default
 
-    def setdefault(self, key: str, default: Any) -> Any:
-        """Valid keys are always defined in an entry only invalid keys will return default."""
-        return self._data[key][self._allocation][self._idx] if key in self.fields else default
-
     def keys(self) -> dict_keys[str]:
         """A view of the keys in the entry."""
         return self.fields.keys()
@@ -250,15 +238,35 @@ class entry():
         for key in self.fields.keys():
             yield key, self[key]
 
-    def update(self, value: dict | Self) -> None:
-        """Update the entry with a dict-like collection of fields."""
-        for k, v in value.items():
-            self[k] = v
-
     def values(self) -> Generator[Any, None, None]:
         """A view of the field values in the entry."""
         for key in self.fields.keys():
             yield self[key]
+
+
+class entry(read_only_entry):
+    """Entry is a dict-like object in a dict like packed_store.
+    It setter methods to the read-only base class.
+    """
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Set the value stored with key."""
+        if __debug__:
+            assert key in self._data, f"'{key}' is not a key in data."
+            assert not self.fields[key]['read_only'], f"Writing to read-only field '{key}'."
+            self.fields[key]['write_count'] += 1
+            _logger.debug(f"Setting key '{key}' to allocation {self._allocation}, index {self._idx}).")
+        self._data[key][self._allocation][self._idx] = value
+        self._data['__modified__'][self._allocation][self._idx] = True
+
+    def setdefault(self, key: str, default: Any) -> Any:
+        """Valid keys are always defined in an entry only invalid keys will return default."""
+        return self._data[key][self._allocation][self._idx] if key in self.fields else default
+
+    def update(self, value: dict | Self) -> None:
+        """Update the entry with a dict-like collection of fields."""
+        for k, v in value.items():
+            self[k] = v
 
 
 T = TypeVar('T', bound=entry)
@@ -436,6 +444,12 @@ class packed_store(Generic[T]):
         """A view of the entrys in the store."""
         for ref in self.ref_to_idx:
             yield self[ref]
+
+    def find(self, field: str, value: Any) -> Generator[T, None, None]:
+        """Return a generator of entrys with field == value."""
+        # TODO: This is not efficient for large stores.
+        # Better to iterate through stores and use native methods to find matches.
+        return (self[ref] for ref in self.ref_to_idx if self[ref][field] == value)
 
     def modified(self, all_fields: bool = False) -> Generator[T, None, None]:
         """A view of the modified entrys in the store.
