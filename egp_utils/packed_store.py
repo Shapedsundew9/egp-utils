@@ -49,7 +49,7 @@ from collections.abc import KeysView as dict_keys
 from copy import deepcopy
 from functools import partial
 from logging import DEBUG, Logger, NullHandler, getLogger
-from typing import Any, Callable, Generator, Literal, NoReturn, Self, TypedDict, TypeVar, Generic, Type
+from typing import Any, Callable, Generator, Literal, NoReturn, Self, TypedDict, TypeVar, Generic, Type, Iterable
 from numpy import bool_, float32, float64, full, int16, int32, int64, uint32
 from numpy.typing import NDArray
 
@@ -468,6 +468,13 @@ class packed_store(Generic[T]):
             idx: int = full_idx & self._idx_mask
             if self.data['__modified__'][allocation][idx]:
                 yield self.entry_type(self.data, allocation, idx, fields)
+
+    def get_allocation(self, fields: Iterable[str]) -> tuple[list[Any], ...]:
+        """Return the raw allocations for fields.
+        
+        Records in allocations are guaranteed to be aligned by index across fields.
+        """
+        return tuple(self.data[key] for key in fields)
 
 
 class _indexed_store_allocation():
