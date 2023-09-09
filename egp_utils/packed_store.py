@@ -62,7 +62,7 @@ _LOG_DEBUG: bool = _logger.isEnabledFor(DEBUG)
 # Pretty print for references
 _OVER_MAX: int = 1 << 64
 _MASK: int = _OVER_MAX - 1
-ref_str: Callable[[int], str] = lambda x: 'None' if x is None else f"{((_OVER_MAX + x) & _MASK):016x}"
+ref_str: Callable[[int], str] = lambda x: "None" if x is None else f"{((_OVER_MAX + x) & _MASK):016x}"
 
 
 class Field(TypedDict):
@@ -78,34 +78,27 @@ class Field(TypedDict):
 
 # Lazy add igraph
 sql_np_mapping: dict[str, Any] = {
-    'BIGINT': int64,
-    'BIGSERIAL': int64,
-    'BOOLEAN': bool_,
-    'DOUBLE PRECISION': float64,
-    'FLOAT8': float64,
-    'FLOAT4': float32,
-    'INT': int32,
-    'INT8': int64,
-    'INT4': int32,
-    'INT2': int16,
-    'INTEGER': int32,
-    'REAL': float32,
-    'SERIAL': int32,
-    'SERIAL8': int64,
-    'SERIAL4': int32,
-    'SERIAL2': int16,
-    'SMALLINT': int16,
-    'SMALLSERIAL': int16
+    "BIGINT": int64,
+    "BIGSERIAL": int64,
+    "BOOLEAN": bool_,
+    "DOUBLE PRECISION": float64,
+    "FLOAT8": float64,
+    "FLOAT4": float32,
+    "INT": int32,
+    "INT8": int64,
+    "INT4": int32,
+    "INT2": int16,
+    "INTEGER": int32,
+    "REAL": float32,
+    "SERIAL": int32,
+    "SERIAL8": int64,
+    "SERIAL4": int32,
+    "SERIAL2": int16,
+    "SMALLINT": int16,
+    "SMALLSERIAL": int16,
 }
 
-_MODIFIED: Field = {
-    'type': bool,
-    'length': 1,
-    'default': False,
-    'read_only': False,
-    'read_count': 0,
-    'write_count': 0
-}
+_MODIFIED: Field = {"type": bool, "length": 1, "default": False, "read_only": False, "read_count": 0, "write_count": 0}
 
 
 def next_idx_generator(delta_size: int, empty_list: list[int], allocate_func: Callable[[], None]) -> Generator[int, None, None]:
@@ -158,18 +151,18 @@ def allocate(data: dict[str, list[Any]], delta_size: int, fields: dict[str, Fiel
     # This is ordered so read-only fields are allocated together for CoW performance.
     size: int = 2**delta_size
     indexed_stores: dict[str, indexed_store] = {}
-    for key, value in sorted(fields.items(), key=lambda x: x[1].get('read_only', True)):
-        shape: int | tuple[int, int] = size if value.get('length', 1) == 1 else (size, value['length'])
-        if isinstance(value['type'], list):
-            data[key].append([value['default']] * size)
-        elif not isinstance(value['type'], indexed_store):
-            data[key].append(full(shape, value['default'], dtype=value['type']))
+    for key, value in sorted(fields.items(), key=lambda x: x[1].get("read_only", True)):
+        shape: int | tuple[int, int] = size if value.get("length", 1) == 1 else (size, value["length"])
+        if isinstance(value["type"], list):
+            data[key].append([value["default"]] * size)
+        elif not isinstance(value["type"], indexed_store):
+            data[key].append(full(shape, value["default"], dtype=value["type"]))
         else:
             istore: indexed_store = indexed_stores[key] if key in indexed_stores else indexed_store(size)
             data[key].append(istore.allocate())
 
 
-class devnull():
+class devnull:
     """Behaves like Linux /dev/null."""
 
     def __len__(self) -> Literal[0]:
@@ -182,12 +175,14 @@ class devnull():
         pass
 
 
-class read_only_entry():
+class read_only_entry:
     """An entry is a dict-like object in a dict like packed_store.
     The base class is read-only.
     """
 
-    def __init__(self, data: dict[str, list[Any]] = {}, allocation: int = 0, idx: int = 0, fields: dict[str, Field] = {}) -> None:
+    def __init__(
+        self, data: dict[str, list[Any]] | None = None, allocation: int = 0, idx: int = 0, fields: dict[str, Field] | None = None
+    ) -> None:
         """Bind the entry to an spot in the store.
 
         NOTE: The data store does not need to be the same as bound in store as the _data
@@ -200,10 +195,10 @@ class read_only_entry():
         idx: Is the index in the allocation.
         fields: The definition of the fields in the entry
         """
-        self._data: dict[str, list[Any]] = data
+        self._data: dict[str, list[Any]] = data if data is not None else {}
         self._allocation: int = allocation
         self._idx: int = idx
-        self.fields: dict[str, Field] = fields
+        self.fields: dict[str, Field] = fields if fields is not None else {}
 
     def __contains__(self, key: str) -> bool:
         """Checks if key is one of the fields in entry."""
@@ -213,7 +208,7 @@ class read_only_entry():
         """Return the value stored with key."""
         if __debug__:
             assert key in self.fields, f"{key} is not a key in data."
-            self.fields[key]['read_count'] += 1
+            self.fields[key]["read_count"] += 1
             _logger.debug(f"Getting key '{key}' from allocation {self._allocation}, index {self._idx}).")
         return self._data[key][self._allocation][self._idx]
 
@@ -253,11 +248,11 @@ class entry(read_only_entry):
         """Set the value stored with key."""
         if __debug__:
             assert key in self._data, f"'{key}' is not a key in data."
-            assert not self.fields[key]['read_only'], f"Writing to read-only field '{key}'."
-            self.fields[key]['write_count'] += 1
+            assert not self.fields[key]["read_only"], f"Writing to read-only field '{key}'."
+            self.fields[key]["write_count"] += 1
             _logger.debug(f"Setting key '{key}' to allocation {self._allocation}, index {self._idx}).")
         self._data[key][self._allocation][self._idx] = value
-        self._data['__modified__'][self._allocation][self._idx] = True
+        self._data["__modified__"][self._allocation][self._idx] = True
 
     def setdefault(self, key: str, default: Any) -> Any:
         """Valid keys are always defined in an entry only invalid keys will return default."""
@@ -269,7 +264,7 @@ class entry(read_only_entry):
             self[k] = v
 
 
-T = TypeVar('T', bound=entry)
+T = TypeVar("T", bound=entry)
 
 
 class packed_store(Generic[T]):
@@ -292,16 +287,16 @@ class packed_store(Generic[T]):
                 },
                 ...
             }
-        entry_type: A sub-class of entry to be returned from the store. 
+        entry_type: A sub-class of entry to be returned from the store.
         delta_size: The log2(minimum number) of entries to add to the allocation when space runs out.
         """
         if fields is None:
             fields = {}
         self.entry_type: Type[T] = entry_type
         self.fields: dict[str, Field] = deepcopy(fields)
-        self.fields['__modified__'] = deepcopy(_MODIFIED)
-        self.writable_fields: dict[str, Field] = {k: v for k, v in self.fields.items() if not v['read_only']}
-        self.read_only_fields: dict[str, Field] = {k: v for k, v in self.fields.items() if v['read_only']}
+        self.fields["__modified__"] = deepcopy(_MODIFIED)
+        self.writable_fields: dict[str, Field] = {k: v for k, v in self.fields.items() if not v["read_only"]}
+        self.read_only_fields: dict[str, Field] = {k: v for k, v in self.fields.items() if v["read_only"]}
         self.delta_size: int = delta_size
         self.ref_to_idx: dict[int, int] = {}
         self.data: dict[str, list[Any]] = {k: [] for k in self.fields.keys()}
@@ -317,9 +312,9 @@ class packed_store(Generic[T]):
         """Check to see if _store has been reasonably utilised."""
         if __debug__:
             for field, value in self.fields.items():
-                if not value['read_count'] + value['write_count']:
+                if not value["read_count"] + value["write_count"]:
                     _logger.warning(f"'{field}' was neither read nor written!")
-                if not value['read_only'] and not value['write_count']:
+                if not value["read_only"] and not value["write_count"]:
                     _logger.warning(f"'{field}' is writable but was never written!")
 
     def __contains__(self, ref: int) -> bool:
@@ -355,7 +350,7 @@ class packed_store(Generic[T]):
         if _LOG_DEBUG:
             _logger.debug(f"Deleting ref {ref_str(ref)}: Allocation {allocation} index {idx}.")
         for k, v in self.fields.items():
-            self.data[k][allocation][idx] = v['default']
+            self.data[k][allocation][idx] = v["default"]
 
     def __getitem__(self, ref: int) -> T:
         """Return an entry dict-like structure from the store.
@@ -375,8 +370,10 @@ class packed_store(Generic[T]):
         allocation: int = full_idx >> self.delta_size
         idx: int = full_idx & self._idx_mask
         if _LOG_DEBUG:
-            _logger.debug(f"Getting entry ref {ref_str(self.data['ref'][allocation][idx])}"
-                          f" from allocation {allocation}, index {idx} (full index = {full_idx:08x}).")
+            _logger.debug(
+                f"Getting entry ref {ref_str(self.data['ref'][allocation][idx])}"
+                f" from allocation {allocation}, index {idx} (full index = {full_idx:08x})."
+            )
         return self.entry_type(self.data, allocation, idx, self.fields)
 
     def __len__(self) -> int:
@@ -407,15 +404,14 @@ class packed_store(Generic[T]):
         allocation: int = full_idx >> self.delta_size
         idx: int = full_idx & self._idx_mask
         if _LOG_DEBUG:
-            _logger.debug(f"Setting entry ref {ref_str(ref)} to allocation {allocation},"
-                          f" index {idx} (full index = {full_idx:08x}).")
-        self.data['__modified__'][allocation][idx] = modified
+            _logger.debug(f"Setting entry ref {ref_str(ref)} to allocation {allocation}," f" index {idx} (full index = {full_idx:08x}).")
+        self.data["__modified__"][allocation][idx] = modified
         for k, v in value.items():
             # None means not set i.e. allocation default.
             if v is not None:
                 self.data.get(k, self._devnull)[allocation][idx] = v
                 if _LOG_DEBUG and k in self.fields:
-                    self.fields[k]['write_count'] += 1
+                    self.fields[k]["write_count"] += 1
                     _logger.debug(f"Setting entry key '{k}' to {self.data.get(k, self._devnull)[allocation][idx]}).")
 
     def __copy__(self) -> NoReturn:
@@ -466,19 +462,18 @@ class packed_store(Generic[T]):
         for full_idx in self.ref_to_idx.values():
             allocation: int = full_idx >> self.delta_size
             idx: int = full_idx & self._idx_mask
-            if self.data['__modified__'][allocation][idx]:
+            if self.data["__modified__"][allocation][idx]:
                 yield self.entry_type(self.data, allocation, idx, fields)
 
     def get_allocation(self, fields: Iterable[str]) -> tuple[list[Any], ...]:
         """Return the raw allocations for fields.
-        
+
         Records in allocations are guaranteed to be aligned by index across fields.
         """
         return tuple(self.data[key] for key in fields)
 
 
-class _indexed_store_allocation():
-
+class _indexed_store_allocation:
     def __init__(self, store: indexed_store) -> None:
         self._data: list[Any] = store._data
         self._empty_set: set[uint32] = store._empty_set
@@ -504,7 +499,7 @@ class _indexed_store_allocation():
             self._empty_set.add(deleted_idx)
 
 
-class indexed_store():
+class indexed_store:
     """For sparsely populated fields to reduce storage costs.
 
     Sparsely defined fields with > 4 bytes storage (e.g. > int32) can save memory by
