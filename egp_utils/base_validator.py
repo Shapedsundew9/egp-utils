@@ -7,12 +7,145 @@ from os.path import isdir, isfile
 from pprint import pformat
 from typing import Any, Callable
 from uuid import UUID
+from datetime import datetime
 
 from cerberus import TypeDefinition, Validator
 from cerberus.errors import UNKNOWN_FIELD
 
 _logger: Logger = getLogger(__name__)
 _logger.addHandler(NullHandler())
+
+
+def str_to_sha256(
+    obj: str | bytearray | memoryview | bytes | None,
+) -> bytearray | memoryview | bytes | None:
+    """Convert a hexidecimal string to a bytearray.
+
+    Args
+    ----
+    obj (str): Must be a hexadecimal string.
+
+    Returns
+    -------
+    (bytearray): bytearray representation of the string.
+    """
+    if isinstance(obj, str):
+        return bytes.fromhex(obj)
+    if (
+        isinstance(obj, memoryview)
+        or isinstance(obj, bytearray)
+        or isinstance(obj, bytes)
+    ):
+        return obj
+    if obj is None:
+        return None
+    raise TypeError(f"Un-encodeable type '{type(obj)}': Expected 'str' or bytes type.")
+
+
+def str_to_uuid(obj: str | UUID | None) -> UUID | None:
+    """Convert a UUID formated string to a UUID object.
+
+    Args
+    ----
+    obj (str): Must be a UUID formated hexadecimal string.
+
+    Returns
+    -------
+    (uuid): UUID representation of the string.
+    """
+    if isinstance(obj, str):
+        return UUID(obj)
+    if isinstance(obj, UUID):
+        return obj
+    if obj is None:
+        return None
+    raise TypeError(f"Un-encodeable type '{type(obj)}': Expected 'str' or UUID type.")
+
+
+def str_to_datetime(obj: str | datetime | None) -> datetime | None:
+    """Convert a datetime formated string to a datetime object.
+
+    Args
+    ----
+    obj (str): Must be a datetime formated string.
+
+    Returns
+    -------
+    (datetime): datetime representation of the string.
+    """
+    if isinstance(obj, str):
+        return datetime.strptime(obj, "%Y-%m-%dT%H:%M:%S.%fZ")
+    if isinstance(obj, datetime):
+        return obj
+    if obj is None:
+        return None
+    raise TypeError(
+        f"Un-encodeable type '{type(obj)}': Expected 'str' or datetime type."
+    )
+
+
+def sha256_to_str(obj: bytearray | bytes | str | None) -> str | None:
+    """Convert a bytearray to its lowercase hexadecimal string representation.
+
+    Args
+    ----
+    obj (bytearray): bytearray representation of the string.
+
+    Returns
+    -------
+    (str): Lowercase hexadecimal string.
+    """
+    if isinstance(obj, (bytes, bytearray)):
+        return obj.hex()
+    if isinstance(obj, str):
+        return obj
+    if obj is None:
+        return None
+    raise TypeError(
+        f"Un-encodeable type '{type(obj)}': Expected bytes, bytearray or str type."
+    )
+
+
+def uuid_to_str(obj: UUID | str | None) -> str | None:
+    """Convert a UUID to its lowercase hexadecimal string representation.
+
+    Args
+    ----
+    obj (UUID): UUID representation of the string.
+
+    Returns
+    -------
+    (str): Lowercase hexadecimal UUID string.
+    """
+    if isinstance(obj, UUID):
+        return str(obj)
+    if isinstance(obj, str):
+        return obj
+    if obj is None:
+        return None
+    raise TypeError(f"Un-encodeable type '{type(obj)}': Expected UUID or str type.")
+
+
+def datetime_to_str(obj: datetime | str | None) -> str | None:
+    """Convert a datetime to its string representation.
+
+    Args
+    ----
+    obj (datetime): datetime representation of the string.
+
+    Returns
+    -------
+    (str): datetime string.
+    """
+    if isinstance(obj, datetime):
+        return obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    if isinstance(obj, str):
+        return obj
+    if obj is None:
+        return None
+    raise TypeError(
+        f"Un-encodeable type '{type(obj)}': Expected bytes, bytearray or str type."
+    )
 
 
 class base_validator(Validator):
@@ -83,6 +216,36 @@ class base_validator(Validator):
                 else:
                     return schema
         return None
+
+    def _normalize_coerce_sha256_str_to_binary(
+        self, value
+    ) -> bytearray | memoryview | bytes | None:
+        return str_to_sha256(value)
+
+    def _normalize_coerce_sha256_str_list_to_binary_list(
+        self, value
+    ) -> list[list[bytearray | memoryview | bytes | None]]:
+        return [[str_to_sha256(v) for v in vv] for vv in value]
+
+    def _normalize_coerce_datetime_str_to_datetime(self, value) -> datetime | None:
+        return str_to_datetime(value)
+
+    def _normalize_coerce_uuid_str_to_uuid(self, value) -> UUID | None:
+        return str_to_uuid(value)
+
+    def _normalize_coerce_sha256_binary_to_str(self, value) -> str | None:
+        return sha256_to_str(value)
+
+    def _normalize_coerce_sha256_binary_list_to_str_list(
+        self, value
+    ) -> list[list[str | None]] | None:
+        return [[sha256_to_str(v) for v in vv] for vv in value]
+
+    def _normalize_coerce_datetime_to_datetime_str(self, value) -> str | None:
+        return datetime_to_str(value)
+
+    def _normalize_coerce_uuid_to_uuid_str(self, value) -> str | None:
+        return uuid_to_str(value)
 
     def str_errors(self, error: Any) -> str:
         """Create an error string."""
