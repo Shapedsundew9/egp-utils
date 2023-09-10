@@ -49,7 +49,19 @@ from collections.abc import KeysView as dict_keys
 from copy import deepcopy
 from functools import partial
 from logging import DEBUG, Logger, NullHandler, getLogger
-from typing import Any, Callable, Generator, Literal, NoReturn, Self, TypedDict, TypeVar, Generic, Type, Iterable
+from typing import (
+    Any,
+    Callable,
+    Generator,
+    Literal,
+    NoReturn,
+    Self,
+    TypedDict,
+    TypeVar,
+    Generic,
+    Type,
+    Iterable,
+)
 from numpy import bool_, float32, float64, full, int16, int32, int64, uint32
 from numpy.typing import NDArray
 
@@ -98,7 +110,14 @@ sql_np_mapping: dict[str, Any] = {
     "SMALLSERIAL": int16,
 }
 
-_MODIFIED: Field = {"type": bool, "length": 1, "default": False, "read_only": False, "read_count": 0, "write_count": 0}
+_MODIFIED: Field = {
+    "type": bool,
+    "length": 1,
+    "default": False,
+    "read_only": False,
+    "read_count": 0,
+    "write_count": 0,
+}
 
 
 def next_idx_generator(delta_size: int, empty_list: list[int], allocate_func: Callable[[], None]) -> Generator[int, None, None]:
@@ -181,7 +200,11 @@ class read_only_entry:
     """
 
     def __init__(
-        self, data: dict[str, list[Any]] | None = None, allocation: int = 0, idx: int = 0, fields: dict[str, Field] | None = None
+        self,
+        data: dict[str, list[Any]] | None = None,
+        allocation: int = 0,
+        idx: int = 0,
+        fields: dict[str, Field] | None = None,
     ) -> None:
         """Bind the entry to an spot in the store.
 
@@ -270,7 +293,12 @@ T = TypeVar("T", bound=entry)
 class packed_store(Generic[T]):
     """Store data compactly with a dict like interface."""
 
-    def __init__(self, fields: dict[str, Field], entry_type: Type[T] = entry, delta_size: int = 16) -> None:
+    def __init__(
+        self,
+        fields: dict[str, Field],
+        entry_type: Type[T] = entry,
+        delta_size: int = 16,
+    ) -> None:
         """Create a _store object.
 
         _store data is stored in numpy arrays or list if not numeric.

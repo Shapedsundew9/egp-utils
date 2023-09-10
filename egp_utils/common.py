@@ -10,7 +10,11 @@ EGP_EMPTY_TUPLE: tuple = tuple()
 
 # https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries
 def merge(  # pylint: disable=dangerous-default-value
-    dict_a: dict[Any, Any], dict_b: dict[Any, Any], path: list[str] = [], no_new_keys: bool = False, update=False
+    dict_a: dict[Any, Any],
+    dict_b: dict[Any, Any],
+    path: list[str] = [],
+    no_new_keys: bool = False,
+    update=False,
 ) -> dict[Any, Any]:
     """Merge dict b into a recursively. a is modified.
     This function is equivilent to a.update(b) unless update is False in which case
