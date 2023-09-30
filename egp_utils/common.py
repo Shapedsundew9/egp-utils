@@ -1,11 +1,26 @@
 """Common routines."""
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from pypgtable.pypgtable_typing import DatabaseConfigNorm
 
 # Fundamental Constants
 EST: timezone = timezone(timedelta(hours=-5))
 EGP_EPOCH: datetime = datetime(2019, 12, 25, 16, 26, tzinfo=EST)
 EGP_EMPTY_TUPLE: tuple = tuple()
+EGP_DEFAULT_DB_CONFIG: DatabaseConfigNorm = {
+    "dbname": "erasmus_db",
+    "host": "localhost",
+    "port": 5432,
+    "user": "postgres",
+    "password": "postgres",
+    "maintenance_db": "postgres",
+    "retries": 5
+}
+
+
+def default_erasumus_db_config() -> DatabaseConfigNorm:
+    """Return the default database configuration for Erasmus GP."""
+    return EGP_DEFAULT_DB_CONFIG.copy()
 
 
 # https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries
