@@ -165,6 +165,7 @@ class base_validator(Validator):
         self.schema: Any = super().schema  # type: ignore
         self.normalized: Callable = super().normalized  # type: ignore
         self.validate: Callable = super().validate  # type: ignore
+        self.rules_set_registry = super().rules_set_registry  # type: ignore
 
     def error_str(self) -> str:
         """Prettier format to a list of errors."""
