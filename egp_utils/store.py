@@ -5,17 +5,9 @@
 """
 from __future__ import annotations
 
-from gc import collect
 from logging import DEBUG, Logger, NullHandler, getLogger
-from typing import Any, TYPE_CHECKING, Self
+from typing import Any, Self
 
-from egp_stores.genomic_library import genomic_library
-from numpy import argsort, empty, int64, intp, int8
-from numpy.typing import NDArray
-
-if TYPE_CHECKING:
-    from .genetic_code import _genetic_code
-    from .graph import graph
 
 # Logging
 _logger: Logger = getLogger(__name__)
@@ -98,7 +90,7 @@ class store:
     def size(self) -> int:
         """Return the size of the store."""
         return self._size
-    
+
     def space(self) -> int:
         """Return the space remaining in the store."""
         return self._size - len(self)
@@ -156,7 +148,7 @@ class _dynamic_store_member():
         self._member: str = member
 
     def __delitem__(self, _: int) -> None:
-        """Removing a member element is not supported."""
+        """Removing a member element is not supported. Delete the index in the store."""
         raise RuntimeError("The dynamic store does not support deleting member elements.")
 
     def __getitem__(self, idx: int) -> Any:
