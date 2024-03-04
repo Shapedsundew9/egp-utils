@@ -14,7 +14,7 @@ EGP_DEFAULT_DB_CONFIG: DatabaseConfigNorm = {
     "user": "postgres",
     "password": "postgres",
     "maintenance_db": "postgres",
-    "retries": 5
+    "retries": 5,
 }
 
 

@@ -96,7 +96,7 @@ class store:
         return self._size - len(self)
 
 
-class static_store_member():
+class static_store_member:
     """An indexing object for static stores if indexing is not directly supported."""
 
     def __init__(self, _store: static_store, member: str) -> None:
@@ -138,8 +138,9 @@ class static_store(store):
         getattr(self, member)[self._last_index] = val
 
 
-class _dynamic_store_member():
+class _dynamic_store_member:
     """An indexing object for dynamic stores."""
+
     _stores: list[static_store]
     _log2size: int
     _mask: int
@@ -188,7 +189,7 @@ class dynamic_store(store):
         self._stores.append(self._store_t(2**self._log2size))
 
         # Dynamically create a derived class of _dynamic_store_member with the dynamic_store parameters set.
-        ds_member_cls = type(f"ds_member_cls_{dynamic_store.ds_member_cls_idx}", (_dynamic_store_member, ), {})
+        ds_member_cls = type(f"ds_member_cls_{dynamic_store.ds_member_cls_idx}", (_dynamic_store_member,), {})
         dynamic_store.ds_member_cls_idx += 1
         ds_member_cls._stores = self._stores
         ds_member_cls._log2size = self._log2size

@@ -31,11 +31,7 @@ def str_to_sha256(
     """
     if isinstance(obj, str):
         return bytes.fromhex(obj)
-    if (
-        isinstance(obj, memoryview)
-        or isinstance(obj, bytearray)
-        or isinstance(obj, bytes)
-    ):
+    if isinstance(obj, memoryview) or isinstance(obj, bytearray) or isinstance(obj, bytes):
         return obj
     if obj is None:
         return None
@@ -79,9 +75,7 @@ def str_to_datetime(obj: str | datetime | None) -> datetime | None:
         return obj
     if obj is None:
         return None
-    raise TypeError(
-        f"Un-encodeable type '{type(obj)}': Expected 'str' or datetime type."
-    )
+    raise TypeError(f"Un-encodeable type '{type(obj)}': Expected 'str' or datetime type.")
 
 
 def sha256_to_str(obj: bytearray | bytes | str | None) -> str | None:
@@ -101,9 +95,7 @@ def sha256_to_str(obj: bytearray | bytes | str | None) -> str | None:
         return obj
     if obj is None:
         return None
-    raise TypeError(
-        f"Un-encodeable type '{type(obj)}': Expected bytes, bytearray or str type."
-    )
+    raise TypeError(f"Un-encodeable type '{type(obj)}': Expected bytes, bytearray or str type.")
 
 
 def uuid_to_str(obj: UUID | str | None) -> str | None:
@@ -143,9 +135,7 @@ def datetime_to_str(obj: datetime | str | None) -> str | None:
         return obj
     if obj is None:
         return None
-    raise TypeError(
-        f"Un-encodeable type '{type(obj)}': Expected bytes, bytearray or str type."
-    )
+    raise TypeError(f"Un-encodeable type '{type(obj)}': Expected bytes, bytearray or str type.")
 
 
 class base_validator(Validator):
@@ -218,14 +208,10 @@ class base_validator(Validator):
                     return schema
         return None
 
-    def _normalize_coerce_sha256_str_to_binary(
-        self, value
-    ) -> bytearray | memoryview | bytes | None:
+    def _normalize_coerce_sha256_str_to_binary(self, value) -> bytearray | memoryview | bytes | None:
         return str_to_sha256(value)
 
-    def _normalize_coerce_sha256_str_list_to_binary_list(
-        self, value
-    ) -> list[list[bytearray | memoryview | bytes | None]]:
+    def _normalize_coerce_sha256_str_list_to_binary_list(self, value) -> list[list[bytearray | memoryview | bytes | None]]:
         return [[str_to_sha256(v) for v in vv] for vv in value]
 
     def _normalize_coerce_datetime_str_to_datetime(self, value) -> datetime | None:
@@ -237,9 +223,7 @@ class base_validator(Validator):
     def _normalize_coerce_sha256_binary_to_str(self, value) -> str | None:
         return sha256_to_str(value)
 
-    def _normalize_coerce_sha256_binary_list_to_str_list(
-        self, value
-    ) -> list[list[str | None]] | None:
+    def _normalize_coerce_sha256_binary_list_to_str_list(self, value) -> list[list[str | None]] | None:
         return [[sha256_to_str(v) for v in vv] for vv in value]
 
     def _normalize_coerce_datetime_to_datetime_str(self, value) -> str | None:
