@@ -47,6 +47,13 @@ class store:
             return self._size - self._remaining
         return self._size - len(self._empty_indices)
 
+    def __repr__(self) -> str:
+        """Return a string representation of the store."""
+        return (
+            f"{type(self).__name__}(size={self._size}, len={len(self)}, remaining={self._remaining},"
+            f" empty_indices={self._empty_indices}, last_index={self._last_index})"
+        )
+
     def __setitem__(self, idx, val) -> Any:
         """Set the object at the specified index."""
         raise NotImplementedError
@@ -211,6 +218,13 @@ class dynamic_store(store):
     def __len__(self) -> int:
         """The length of the store is the sum of the lengths of the static stores."""
         return sum(len(store) for store in self._stores)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the store."""
+        return (
+            f"{type(self).__name__}(size={self.size()}, len={len(self)}, remaining={self.space()},"
+            f" empty_indices={self.empty_indices()}, last_index={self._last_index})"
+        )
 
     def __setitem__(self, member: str, val: Any) -> None:
         """Set the member at the last index returned by self.next_index()"""

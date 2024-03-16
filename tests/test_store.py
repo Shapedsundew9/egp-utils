@@ -3,15 +3,15 @@
 from random import randint
 from typing import Any
 
-from numpy import empty
+from numpy import empty, full
 from numpy.typing import NDArray
 
 from egp_utils.store import dynamic_store, static_store
 
 
 # Create a store implementation.
-class sstore_t(static_store):
-    """A static store implementation."""
+class sstore_t1(static_store):
+    """A simple static store implementation."""
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -20,9 +20,19 @@ class sstore_t(static_store):
         self.c: NDArray[Any] = empty(self._size, dtype=int)
 
 
+class sstore_t2(static_store):
+    """A static store implementation with 2D data type"""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.d: NDArray[Any] = empty((self._size, 32), dtype=int)
+        self.e: NDArray[Any] = empty((self._size, 32), dtype=int)
+        self.f: NDArray[Any] = empty((self._size, 32), dtype=int)
+
+
 # These 3 stores are identical in functionality.
-sstore = sstore_t(2**10)
-dstore = dynamic_store(sstore_t, 6)
+sstore = sstore_t1(2**10)
+dstore = dynamic_store(sstore_t1, 6)
 sdict: dict[str, NDArray[Any]] = {
     "a": empty(2**10, dtype=int),
     "b": empty(2**10, dtype=int),
@@ -131,3 +141,17 @@ def test_store_del() -> None:
     del dstore[2**10 - 345]
     assert len(sstore) == 2**10 - 2
     assert len(dstore) == 2**10 - 2
+
+
+def test_dstore_complex() -> None:
+    """Use the dynamic store with a 2D data type."""
+    dstore = dynamic_store(sstore_t2, 6)
+    for i in range(2**10):
+        dstore["d"][dstore.next_index()] = full((32,), i)
+        dstore["e"][dstore.last_index()] = full((32,), i + 2**10)
+        dstore["f"] = full((32,), i + 2**10 * 2)
+    for _ in range(2**10):
+        idx: int = randint(0, 2**10 - 1)
+        assert dstore["d"][idx][randint(0, 31)] == idx
+        assert dstore["e"][idx][randint(0, 31)] == idx + 2**10
+        assert dstore["f"][idx][randint(0, 31)] == idx + 2**10 * 2

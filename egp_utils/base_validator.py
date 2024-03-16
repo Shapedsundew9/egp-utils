@@ -8,6 +8,7 @@ from pprint import pformat
 from typing import Any, Callable
 from uuid import UUID
 from datetime import datetime
+from numpy import ndarray, uint8
 
 from cerberus import TypeDefinition, Validator
 from cerberus.errors import UNKNOWN_FIELD
@@ -31,6 +32,8 @@ def str_to_sha256(
     """
     if isinstance(obj, str):
         return bytes.fromhex(obj)
+    if isinstance(obj, ndarray) and obj.dtype == uint8 and len(obj) == 32:
+        return obj.tobytes()
     if isinstance(obj, memoryview) or isinstance(obj, bytearray) or isinstance(obj, bytes):
         return obj
     if obj is None:
@@ -91,6 +94,8 @@ def sha256_to_str(obj: bytearray | bytes | str | None) -> str | None:
     """
     if isinstance(obj, (bytes, bytearray)):
         return obj.hex()
+    if isinstance(obj, ndarray) and obj.dtype == uint8 and len(obj) == 32:
+        return obj.tobytes().hex()
     if isinstance(obj, str):
         return obj
     if obj is None:
